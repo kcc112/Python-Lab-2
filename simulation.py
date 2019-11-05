@@ -3,8 +3,8 @@ from json import dumps
 from math import sqrt
 from csv import writer, QUOTE_MINIMAL
 
-rounds = 50
-sheep_number = 15
+rounds = 10
+sheep_number = 1
 init_pos_limit = 10.0
 sheep_move_dist = 0.5
 wolf_move_dist = 1.0
@@ -72,16 +72,6 @@ class Wolf():
 
             self.position['x'] = x_w + (wolf_move_dist * (x_s - x_w))/old_distance
             self.position['y'] = y_w + (wolf_move_dist * (y_s - y_w))/old_distance
-
-            if x_s >= x_w:
-                self.position['x'] += wolf_move_dist
-            else:
-                self.position['x'] -= wolf_move_dist
-
-            if y_s >= y_w:
-                self.position['y'] += wolf_move_dist
-            else:
-                self.position['y'] -= wolf_move_dist
 
 
 sheeps = []
