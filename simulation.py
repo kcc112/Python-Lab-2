@@ -1,6 +1,7 @@
 from random import uniform, choice
 from json import dumps
 from math import sqrt
+from csv import writer, QUOTE_MINIMAL
 
 rounds = 50
 sheep_number = 15
@@ -89,8 +90,10 @@ wolf = Wolf()
 for i in range(sheep_number):
     sheeps.append(Sheep(i))
 
-file = open('pos.json', 'w+')
-file.write('[')
+file_json = open('pos.json', 'w+')
+file_csv = open('alive.csv', 'w+')
+csv_writer = writer(file_csv, delimiter = ',', quotechar = '|', quoting = QUOTE_MINIMAL)
+file_json.write('[')
 
 for i in range(rounds):
 
@@ -104,7 +107,7 @@ for i in range(rounds):
     sheeps_after = wolf.move(sheeps)
     print("Wolf position:  %.3f, %.3f" %
           (wolf.position['x'], wolf.position['y']))
-    print(f'Number of alive sheeps: {len([i for i in sheeps if i] )}')
+    print(f'Number of sheeps alive: {len([i for i in sheeps if i] )}')
     print('------------------------------')
 
     if sheeps_after != None:
@@ -116,16 +119,17 @@ for i in range(rounds):
         else:
             sheep_json.append(None)
 
-    round_json = dumps(
-        {'round_no': i, 'sheep_pos': sheep_json, 'wolf_pos': wolf.position})
+    csv_writer.writerow([i, len([i for i in sheeps if i])])
+    round_json = dumps({'round_no': i, 'sheep_pos': sheep_json, 'wolf_pos': wolf.position})
 
     if i == rounds - 1 or len([i for i in sheeps if i]) == 0:
-        file.write(round_json)
+        file_json.write(round_json)
     else:
-        file.write(round_json + ',\n')
+        file_json.write(round_json + ',\n')
 
     if len([i for i in sheeps if i]) == 0:
         break
 
-file.write(']')
-file.close()
+file_json.write(']')
+file_json.close()
+file_csv.close()
