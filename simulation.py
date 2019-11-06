@@ -1,7 +1,10 @@
+import configparser
+import os
 from random import uniform, choice
 from json import dumps
 from math import sqrt
 from csv import writer, QUOTE_MINIMAL
+from argparse import ArgumentParser
 
 rounds = 10
 sheep_number = 1
@@ -72,6 +75,32 @@ class Wolf():
 
             self.position['x'] = x_w + (wolf_move_dist * (x_s - x_w))/old_distance
             self.position['y'] = y_w + (wolf_move_dist * (y_s - y_w))/old_distance
+
+config = configparser.ConfigParser()
+parser = ArgumentParser(description = 'wolf sheep simulation')
+parser.add_argument('-c', '--config', metavar = 'FILE', dest ='file', help = 'configuration file', required = False)
+parser.add_argument('-d', '--dir', metavar = 'DIR', dest ='directory', help = 'directory for log files', required = False)
+parser.add_argument('-l', '--log', metavar = 'LEVEL', dest ='log_level', help = 'debug, info, warning, error, critical', required = False)
+parser.add_argument('-r', '--rounds', metavar = 'NUM', dest ='rounds_number', help = 'rounds number', required = False)
+parser.add_argument('-s', '--sheep', metavar = 'NUM', dest ='sheep_number', help = 'sheep number', required = False)
+parser.add_argument('-w', '--wait', help = 'wait after round end')
+args = parser.parse_args()
+
+if args.file:
+    config.read(args.file)
+    init_pos_limit = float(config['Terrain']['InitPosLimit'])
+    if(init_pos_limit < 0):
+        raise ValueError('init_pos_limit cannot be less than 0')
+    sheep_move_dist = float(config['Movement']['SheepMoveDist'])
+    if(sheep_move_dist < 0):
+        raise ValueError('sheep_move_dist cannot be less than 0')
+    wolf_move_dist = float(config['Movement']['WolfMoveDist'])
+    if(wolf_move_dist < 0):
+        raise ValueError('wolf_move_dist cannot be less than 0')
+
+if args.directory:
+    os.mkdir(args.directory)
+
 
 
 sheeps = []
