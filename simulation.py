@@ -81,27 +81,45 @@ parser = ArgumentParser(description = 'wolf sheep simulation')
 parser.add_argument('-c', '--config', metavar = 'FILE', dest ='file', help = 'configuration file', required = False)
 parser.add_argument('-d', '--dir', metavar = 'DIR', dest ='directory', help = 'directory for log files', required = False)
 parser.add_argument('-l', '--log', metavar = 'LEVEL', dest ='log_level', help = 'debug, info, warning, error, critical', required = False)
-parser.add_argument('-r', '--rounds', metavar = 'NUM', dest ='rounds_number', help = 'rounds number', required = False)
-parser.add_argument('-s', '--sheep', metavar = 'NUM', dest ='sheep_number', help = 'sheep number', required = False)
-parser.add_argument('-w', '--wait', help = 'wait after round end')
+parser.add_argument('-r', '--rounds', metavar = 'NUM', dest ='rounds_number', help = 'rounds number', type = int, required = False)
+parser.add_argument('-s', '--sheep', metavar = 'NUM', dest ='sheep_number', help = 'sheep number', type = int, required = False)
+parser.add_argument('-w', '--wait', help = 'wait after round end', action = 'store_true')
 args = parser.parse_args()
 
 if args.file:
     config.read(args.file)
+    
     init_pos_limit = float(config['Terrain']['InitPosLimit'])
-    if(init_pos_limit < 0):
+    if init_pos_limit < 0:
         raise ValueError('init_pos_limit cannot be less than 0')
+    
     sheep_move_dist = float(config['Movement']['SheepMoveDist'])
-    if(sheep_move_dist < 0):
+    if sheep_move_dist < 0:
         raise ValueError('sheep_move_dist cannot be less than 0')
+    
     wolf_move_dist = float(config['Movement']['WolfMoveDist'])
-    if(wolf_move_dist < 0):
+    if wolf_move_dist < 0:
         raise ValueError('wolf_move_dist cannot be less than 0')
 
 if args.directory:
-    os.mkdir(args.directory)
+    if not os.path.isdir(f'./{args.directory}'):
+        os.mkdir(args.directory)
+        
+    file_json = open(f'./{args.directory}/pos.json', 'w+')
+    file_csv = open(f'./{args.directory}/alive.csv', 'w+')
+else:
+    file_json = open('pos.json', 'w+')
+    file_csv = open('alive.csv', 'w+')
 
+if args.rounds_number:
+    if args.rounds_number < 0:
+        raise ValueError('rounds_number cannot be less than 0')
+    rounds = args.rounds_number
 
+if args.sheep_number:
+    if args.sheep_number < 0:
+        raise ValueError('sheep_number cannot be less than 0')
+    sheep_number = args.sheep_number
 
 sheeps = []
 wolf = Wolf()
@@ -109,8 +127,6 @@ wolf = Wolf()
 for i in range(sheep_number):
     sheeps.append(Sheep(i))
 
-file_json = open('pos.json', 'w+')
-file_csv = open('alive.csv', 'w+')
 csv_writer = writer(file_csv, delimiter = ',', quotechar = '|', quoting = QUOTE_MINIMAL)
 file_json.write('[')
 
@@ -145,6 +161,9 @@ for i in range(rounds):
         file_json.write(round_json)
     else:
         file_json.write(round_json + ',\n')
+
+    if args.wait:
+        input('')
 
     if len([i for i in sheeps if i]) == 0:
         break
