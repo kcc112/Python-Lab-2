@@ -206,7 +206,7 @@ for i in range(rounds):
 
     csv_writer.writerow([i, len([i for i in sheeps if i])])
     round_json = dumps(
-        {'round_no': i, 'sheep_pos': sheep_json, 'wolf_pos': wolf.position})
+        {'round_no': i, 'sheep_pos': sheep_json, 'wolf_pos': wolf.position}, indent = 1)
 
     if i == rounds - 1 or len([i for i in sheeps if i]) == 0:
         logging.info("Write rounds to json file.")
