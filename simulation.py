@@ -2,13 +2,13 @@ import configparser
 import os
 from random import uniform, choice
 from json import dumps
-from math import sqrt
+from math import sqrt, inf
 from csv import writer, QUOTE_MINIMAL
 from argparse import ArgumentParser
 import logging
 
-rounds = 10
-sheep_number = 3
+rounds = 50
+sheep_number = 15
 init_pos_limit = 10.0
 sheep_move_dist = 0.5
 wolf_move_dist = 1.0
@@ -26,17 +26,15 @@ class Sheep():
     def move(self):
         logging.debug(
             "Call sheep.move() method. Sheep number: " + str(self.number))
-        direction_x = choice(['W', 'E'])
-        direction_y = choice(['N', 'S'])
+        direction = choice(['W', 'E', 'N', 'S'])
         logging.info(
             'Sheep nr ' + str(self.number) + ' position before move: ' + str(
                 self.position['x']) + ' ,' + str(self.position['y']))
-        if direction_x == 'E':
+        if direction == 'E':
             self.position['x'] += sheep_move_dist
-        else:
+        elif direction == 'W':
             self.position['x'] -= sheep_move_dist
-
-        if direction_y == 'N':
+        elif direction == 'N':
             self.position['y'] += sheep_move_dist
         else:
             self.position['y'] -= sheep_move_dist
@@ -57,7 +55,7 @@ class Wolf():
         logging.debug("Call wolf.move() method.")
         logging.info('Wolf position before move: ' + str(
             self.position['x']) + ' ,' + str(self.position['y']))
-        old_distance = 20
+        old_distance = inf
         sheep_nr = 0
 
         for sheep in sheep_list:
@@ -84,10 +82,8 @@ class Wolf():
             x_w = self.position['x']
             y_w = self.position['y']
 
-            self.position['x'] = x_w + (
-                    wolf_move_dist * (x_s - x_w)) / old_distance
-            self.position['y'] = y_w + (
-                    wolf_move_dist * (y_s - y_w)) / old_distance
+            self.position['x'] = x_w + (wolf_move_dist * (x_s - x_w)) / old_distance
+            self.position['y'] = y_w + (wolf_move_dist * (y_s - y_w)) / old_distance
         logging.info('Wolf position after move: ' + str(
             self.position['x']) + ' ,' + str(self.position['y']))
 
@@ -144,7 +140,6 @@ if args.file:
 if args.directory:
     if not os.path.isdir(f'./{args.directory}'):
         os.mkdir(args.directory)
-
     file_json = open(f'./{args.directory}/pos.json', 'w+')
     file_csv = open(f'./{args.directory}/alive.csv', 'w+')
     logging.info("Set pos.json and alive.csv location in given directory.")
